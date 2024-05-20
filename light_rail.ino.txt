@@ -1,0 +1,70 @@
+
+
+
+#include <Servo.h>
+
+// Define pins for components
+const int Train_stop_pin = A0;  // Light sensor for train stop
+const int Each_stop_pin = 2;    // Light for each stop
+const int Turn_pin = A1;         // Light sensor for turning
+const int Turner_pin = 3;        // Light for turning
+const int Button_pin = 4;        // Button for servo control
+const int Track_Turner_pin = 5;  // Servo for track turning
+
+const int motorPin1  = 10; // Pin  7 of L293
+const int motorPin2  = 9;  // Pin  2 of L293
+
+Servo trackTurner;
+
+void setup() {
+  pinMode(Train_stop_pin, INPUT);
+  pinMode(Each_stop_pin, OUTPUT);
+  pinMode(Turn_pin, INPUT);
+  pinMode(Turner_pin, OUTPUT);
+  pinMode(Button_pin, INPUT_PULLUP);
+  pinMode(Track_Turner_pin, OUTPUT);
+
+  trackTurner.attach(Track_Turner_pin);
+  pinMode(motorPin1, OUTPUT);
+  pinMode(motorPin2, OUTPUT);
+  
+  // Initial conditions
+  digitalWrite(Each_stop_pin, HIGH); // Each_stop light always on
+  digitalWrite(Turner_pin, HIGH);    // Turner light always on
+}
+
+void loop() {
+  // Train stop logic
+  if (digitalRead(Train_stop_pin) == LOW) {
+    digitalWrite(motorPin1, LOW);
+    digitalWrite(motorPin2, LOW);
+    delay(300);
+    digitalWrite(Each_stop_pin, LOW); // Turn off Each_stop light
+    delay(1000);                      // Stop for 10 seconds
+    digitalWrite(Each_stop_pin, HIGH); // Turn on Each_stop light
+    delay(200);
+  }
+  else {    
+    digitalWrite(motorPin1, LOW);
+    digitalWrite(motorPin2, HIGH);
+  }
+
+  // Turning logic
+  if (digitalRead(Turn_pin) == LOW) {
+    digitalWrite(Turner_pin, LOW); // Turn off Turner light
+    // Additional turning logic can be added here
+  } else {
+    digitalWrite(Turner_pin, HIGH); // Turn on Turner light
+    // Additional logic for not turning can be added here
+  }
+
+  // Servo control with button
+  if (digitalRead(Button_pin) == LOW) { // Button pressed
+    if (trackTurner.read() == 0) {      // Last move was right
+      trackTurner.write(180);           // Move left
+    } else {
+      trackTurner.write(0);             // Move right
+    }
+    delay(500);  // Debounce delay
+  }
+}
